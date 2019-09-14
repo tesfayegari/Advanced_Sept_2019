@@ -1,0 +1,200 @@
+<section class="container">
+  <h1>FAQ</h1>
+  <div class="ac">
+    <input class="ac-input" id="ac-1" name="ac-1" type="checkbox" />
+    <label class="ac-label" for="ac-1"> IT Questions</label>
+    <article class="ac-text">
+      <div class="ac-sub">
+        <input class="ac-input" id="ac-2" name="ac-2" type="checkbox" />
+        <label class="ac-label" for="ac-2">What is SharePoint?</label>
+        <article class="ac-sub-text">
+          <p>
+            SharePoint is a web-based collaborative platform that integrates
+            with Microsoft Office. Launched in 2001, SharePoint is primarily
+            sold as a document management and storage system, but the
+            product is highly configurable and usage varies substantially
+            among organizations..
+          </p>
+        </article>
+      </div>
+      <div class="ac-sub">
+        <input class="ac-input" id="ac-3" name="ac-3" type="checkbox" />
+        <label class="ac-label" for="ac-3">How do I access SharePoint site?</label>
+        <article class="ac-sub-text">
+          <p>
+            SharePoint is a web-based collaborative platform that integrates
+            with Microsoft Office. Launched in 2001, SharePoint is primarily
+            sold as a document management and storage system, but the
+            product is highly configurable and usage varies substantially
+            among organizations.
+          </p>
+        </article>
+      </div>
+    </article>
+    <!--/ac-text-->
+  </div>
+  <!--/ac-->
+
+  <div class="ac">
+    <input class="ac-input" id="ac-4" name="ac-4" type="checkbox" />
+    <label class="ac-label" for="ac-4"> Law Questions</label>
+
+    <article class="ac-text">
+      <div class="ac-sub">
+        <input class="ac-input" id="ac-5" name="ac-5" type="checkbox" />
+        <label class="ac-label" for="ac-5">What is Law?</label>
+        <article class="ac-sub-text">
+          <p>
+            Law is a system of rules that are created and enforced through
+            social or governmental institutions to regulate behavior. It has
+            been defined both as "the Science of Justice" and "the Art of
+            Justice". Law is a system that regulates and ensures that
+            individuals or a community adhere to the will of the state.
+          </p>
+        </article>
+      </div>
+
+      <div class="ac-sub">
+        <input class="ac-input" id="ac-6" name="ac-6" type="checkbox" />
+        <label class="ac-label" for="ac-6">What is law and its purpose?</label>
+        <article class="ac-sub-text">
+          <p>
+            The law serves many purposes and functions in society. Four
+            principal purposes and functions are establishing standards,
+            maintaining order, resolving disputes, and protecting liberties
+            and rights.
+          </p>
+        </article>
+      </div>
+    </article>
+    <!--/ac-text-->
+  </div>
+  <!--/ac-->
+  <style>
+    /* @import "compass/css3"; */
+
+    body {
+      font-family: "Source Sans Pro", sans-serif;
+    }
+
+    h1 {
+      padding-left: 0;
+      margin-left: 0;
+    }
+
+    .container {
+      width: 40em;
+      margin: 10px auto;
+    }
+
+    .ac-label {
+      font-weight: 700;
+      position: relative;
+      padding: 0.5em 1em;
+      margin-left: 0.5em;
+      display: block;
+      cursor: pointer;
+      background-color: whiteSmoke;
+      transition: background-color 0.15s ease-in-out;
+    }
+
+    .ac-input:checked+label,
+    .ac-label:hover {
+      background-color: #999;
+    }
+
+    .ac-label:after,
+    .ac-input:checked+.ac-label:after {
+      content: "+";
+      position: absolute;
+      display: block;
+      right: 0;
+      top: 0;
+      width: 2em;
+      height: 100%;
+      line-height: 2.25em;
+      text-align: center;
+      background-color: #e5e5e5;
+      transition: background-color 0.15s ease-in-out;
+    }
+
+    .ac-label:hover:after,
+    .ac-input:checked+.ac-label:after {
+      background-color: #b5b5b5;
+    }
+
+    .ac-input:checked+.ac-label:after {
+      content: "-";
+    }
+
+    .ac-input {
+      display: none;
+    }
+
+    .ac-text,
+    .ac-sub-text {
+      opacity: 0;
+      height: 0;
+      margin-left: 0.5em;
+      transition: opacity 0.5s ease-in-out;
+      overflow: hidden;
+    }
+
+    .ac-input:checked~.ac-text,
+    .ac-sub .ac-input:checked~.ac-sub-text {
+      opacity: 1;
+      height: auto;
+    }
+
+    .ac-sub .ac-label {
+      background: none;
+      font-weight: 600;
+      padding: 0.5em 2em;
+      margin-left: 0;
+    }
+
+    .ac-sub .ac-label:checked {
+      background: none;
+      border-left: 1px solid whitesmoke;
+    }
+
+    .ac-sub .ac-label:after,
+    .ac-sub .ac-input:checked+.ac-label:after {
+      left: 0;
+      background: none;
+    }
+
+    .ac-sub .ac-input:checked+label,
+    .ac-sub .ac-label:hover {
+      background: none;
+    }
+
+    .ac-sub-text {
+      padding: 0 1em 0 2em;
+    }
+  </style>
+</section>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script>
+  function getItems(listName) {
+    var endPoint = _spPageContextInfo.webAbsoluteUrl + "/_api/web/Lists/getbytitle('" + listName + "')/items";
+    return $.ajax({
+      url: endPoint,
+      type: "GET",
+      headers: {
+        "accept": "application/json;odata=verbose",
+      }
+    });
+  }//End of GetList Items 
+
+  $(document).ready(function () {
+    getItems('FAQ').then(function(response){
+      console.log('Our First Data: ', response);
+
+    },function(error){console.error(error);})
+  
+  });
+
+
+
+</script>
