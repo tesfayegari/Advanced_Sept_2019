@@ -1,81 +1,131 @@
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+<style>
+  html {
+    box-sizing: border-box;
+  }
 
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
-    html {
-      box-sizing: border-box;
-    }
+  *,
+  *:before,
+  *:after {
+    box-sizing: inherit;
+  }
 
-    *,
-    *:before,
-    *:after {
-      box-sizing: inherit;
-    }
+  .column {
+    float: left;
+    width: 33.3%;
+    margin-bottom: 16px;
+    padding: 0 8px;
+  }
 
+  @media screen and (max-width: 650px) {
     .column {
-      float: left;
-      width: 33.3%;
-      margin-bottom: 16px;
-      padding: 0 8px;
-    }
-
-    @media screen and (max-width: 650px) {
-      .column {
-        width: 100%;
-        display: block;
-      }
-    }
-
-    .card {
-      box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
-    }
-
-    .container {
-      padding: 0 16px;
-    }
-
-    .container::after,
-    .row::after {
-      content: "";
-      clear: both;
-      display: table;
-    }
-
-    .title {
-      color: grey;
-    }
-
-    .button {
-      border: none;
-      outline: 0;
-      display: inline-block;
-      padding: 8px;
-      color: white;
-      background-color: #000;
-      text-align: center;
-      cursor: pointer;
       width: 100%;
+      display: block;
     }
+  }
 
-    .button:hover {
-      background-color: #555;
-    }
-  </style>
+  .card {
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+  }
 
-  <h2>Employees</h2>
-  
+  .container {
+    padding: 0 16px;
+  }
 
-  <div class="row" id="empCards">
+  .container::after,
+  .row::after {
+    content: "";
+    clear: both;
+    display: table;
+  }
 
-    
+  .title {
+    color: grey;
+  }
+
+  .button {
+    border: none;
+    outline: 0;
+    display: inline-block;
+    padding: 8px;
+    color: white;
+    background-color: #000;
+    text-align: center;
+    cursor: pointer;
+    width: 100%;
+  }
+
+  .button:hover {
+    background-color: #555;
+  }
+</style>
+
+<h2>Employees</h2>
 
 
+<div class="row" id="empCards">
+</div>
+<div class="container">
+
+  <!-- Button to Open the Modal -->
+  <!-- <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">
+      Open modal
+    </button> -->
+
+  <!-- The Modal -->
+  <div class="modal" id="myModal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+
+        <!-- Modal Header -->
+        <div class="modal-header">
+          <h4 class="modal-title">Full Name</h4>
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+
+        <!-- Modal body -->
+        <div class="modal-body">
+          <ul class="list-group">
+            <li class="list-group-item"><strong>Name: </strong>Cras justo odio</li>
+            <li class="list-group-item"><strong>email: </strong> ac facilisis in</li>
+            <li class="list-group-item">Morbi leo risus</li>
+            <li class="list-group-item">Porta ac consectetur ac</li>
+            <li class="list-group-item">Vestibulum at eros</li>
+          </ul>
+        </div>
+
+        <!-- Modal footer -->
+        <div class="modal-footer">
+          <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+        </div>
+
+      </div>
+    </div>
   </div>
+
+</div>
+
+
+
 
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 <script>
+  var items=[],next, prev = [], pageNumber = 1, totalCount = 0, currentUrl, selectedItem={};
+
+  getItemsByUrl("https://tgari2018.sharepoint.com/sites/demo/_api/web/Lists/getbytitle('EmployeeDirectory')")
+    .then(function (data) {
+      console.log('List Info:', data.d);
+      totalCount = data.d.ItemCount;
+    }, function (error) { console.log(error); });
+
   function getItems(listName, odata) {
     var endPoint = _spPageContextInfo.webAbsoluteUrl + "/_api/web/Lists/getbytitle('" + listName + "')/items" + odata;
+    currentUrl = endPoint;
     return $.ajax({
       url: endPoint,
       type: "GET",
@@ -85,35 +135,98 @@
     });
   }//End of GetList Items 
 
-  $(document).ready(function () { 
-    //Reading List Items 
-    getItems('EmployeeDirectory','?$top=9').then(function(data){
-      // response data
-      var items = data.d.results;
-      var empHtml = '';
-      for(var index in items){
-        var item = items[index];
-        var imageId = ((index + 1)%3 == 0) ? 3:(index + 1)%3;
-        empHtml += `<div class="column">
+  function getItemsByUrl(endPoint) {
+    currentUrl = endPoint;
+    return $.ajax({
+      url: endPoint,
+      type: "GET",
+      headers: {
+        "accept": "application/json;odata=verbose",
+      }
+    });
+  }//End of getItemsByUrl  
+
+  function handleNext() {
+    console.log('Next Clicked');
+    if (next == null || next == undefined || next == '')
+      return;
+    prev.push(currentUrl);
+    pageNumber += 1;
+    getItemsByUrl(next).then(function (data) {
+      // response data      
+      items = data.d.results;
+      console.log('Items are : ', items);
+      next = data.d.__next;
+      renderEmployee(items);
+    }, function (error) { console.error(error); });
+
+  }
+
+  function handlePrevious() {
+    console.log('Previous Clicked');
+    if (prev.length <= 0)
+      return;
+    var url = prev.pop();
+    pageNumber -= 1;
+    getItemsByUrl(url).then(function (data) {
+      // response data      
+      items = data.d.results;
+      console.log('Items are : ', items);
+      next = data.d.__next;
+      renderEmployee(items);
+    }, function (error) { console.error(error); });
+
+  }
+
+  function itemSelected(itemID){
+    var item = items.filter(function(i){return i.ID == itemID});
+    selectedItem = item[0];
+    console.log('Selected item is ', item[0]);
+  }
+
+  function renderEmployee(items) {
+    var empHtml = '';
+    for (var index in items) {
+      var item = items[index];
+      item.photo =`https://picsum.photos/id/${index * 1 + 1}/800/800`;
+      var imageId = ((index + 1) % 3 == 0) ? 3 : (index + 1) % 3;
+      empHtml += `<div class="column">
                       <div class="card">
-                        <img src="https://www.w3schools.com/w3images/team${imageId}.jpg" alt="Jane" style="width:100%">
+                        <img src="${item.photo}" alt="Jane" style="width:100%">
                         <div class="container">
-                          <h2>${item.FullName}</h2>
+                          <h4>${item.FullName}</h4>
                           <p class="title">${item.Title}</p>
-                          <p>${item.ShortDescription.substring(0,50)}...</p>
+                          <p>${item.ShortDescription.substring(0, 50)}...</p>
                           <p>${item.PhoneNumber}</p>
-                          <p><button class="button">Detail</button></p>
+                          <p><button type="button" onClick="itemSelected(${item.ID})" class="button" data-toggle="modal" data-target="#myModal">Detail</button></p>
                         </div>
                       </div>
                     </div>`;
-      }
+    }
 
-      $('#empCards').html(empHtml);
+    empHtml += `
+          <ul class="pagination justify-content-center">
+            <li class="page-item ${(prev.length <= 0) ? 'disabled' : ''}"><a class="page-link" onClick="handlePrevious()" href="javascript:void(0);">Previous</a></li>
+            <li class="page-item disabled"><a class="page-link" href="javascript:void(0);">Page ${pageNumber} of ${totalCount} items</a></li>
+            <li class="page-item ${(next == undefined || next == '' || next == null) ? 'disabled' : ''}"><a class="page-link" onClick="handleNext()" href="javascript:void(0);">Next</a></li>
+          </ul>
+          `;
+
+    $('#empCards').html(empHtml);
+    $('#s4-workspace').animate({ scrollTop: 0 }, 'fast');
+  }
+
+  $(document).ready(function () {
+    //Reading List Items 
+    getItems('EmployeeDirectory', '?$top=9').then(function (data) {
+      // response data
+      items = data.d.results;
+      console.log('Items are : ', items);
+      next = data.d.__next;
+      renderEmployee(items);
+    }, function (error) { console.error(error); });
 
 
-    }, function(error){console.error(error);});
-  
-  
   });
 
 
