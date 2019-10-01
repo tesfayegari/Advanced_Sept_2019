@@ -1,8 +1,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
 <style>
   html {
     box-sizing: border-box;
@@ -62,49 +64,48 @@
   .button:hover {
     background-color: #555;
   }
+
+  /* Bootstrap 4 text input with search icon */
+
+  .has-search .form-control {
+    padding-left: 2.375rem;
+  }
+
+  .has-search .form-control-feedback {
+    position: absolute;
+    z-index: 2;
+    display: block;
+    width: 2.375rem;
+    height: 2.375rem;
+    line-height: 2.375rem;
+    text-align: center;
+    pointer-events: none;
+    color: #aaa;
+  }
+
+  #pageTitle {
+    display: none;
+  }
 </style>
 
-<h2>Employees</h2>
-
+<div class="container mt-3 mb-5">
+  <!-- Another variation with a button -->
+  <div class="input-group">
+    <input id="mtmSearchQuery" type="text" class="form-control" placeholder="Search Employee...">
+    <div class="input-group-append">
+      <button id="mtmSearchButton" class="btn btn-secondary" type="button">
+        <i class="fa fa-search"></i>
+      </button>
+    </div>
+  </div>
+</div>
 
 <div class="row" id="empCards">
 </div>
 <div class="container">
-
-  <!-- Button to Open the Modal -->
-  <!-- <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">
-      Open modal
-    </button> -->
-
   <!-- The Modal -->
   <div class="modal" id="myModal">
-    <div class="modal-dialog">
-      <div class="modal-content">
 
-        <!-- Modal Header -->
-        <div class="modal-header">
-          <h4 class="modal-title">Full Name</h4>
-          <button type="button" class="close" data-dismiss="modal">&times;</button>
-        </div>
-
-        <!-- Modal body -->
-        <div class="modal-body">
-          <ul class="list-group">
-            <li class="list-group-item"><strong>Name: </strong>Cras justo odio</li>
-            <li class="list-group-item"><strong>email: </strong> ac facilisis in</li>
-            <li class="list-group-item">Morbi leo risus</li>
-            <li class="list-group-item">Porta ac consectetur ac</li>
-            <li class="list-group-item">Vestibulum at eros</li>
-          </ul>
-        </div>
-
-        <!-- Modal footer -->
-        <div class="modal-footer">
-          <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
-        </div>
-
-      </div>
-    </div>
   </div>
 
 </div>
@@ -115,9 +116,10 @@
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 <script>
-  var items=[],next, prev = [], pageNumber = 1, totalCount = 0, currentUrl, selectedItem={};
+  // Global Variabls
+  var items = [], next, prev = [], pageNumber = 1, totalCount = 0, currentUrl, selectedItem = {};
 
-  getItemsByUrl("https://tgari2018.sharepoint.com/sites/demo/_api/web/Lists/getbytitle('EmployeeDirectory')")
+  getItemsByUrl(_spPageContextInfo.webAbsoluteUrl +  "/_api/web/Lists/getbytitle('EmployeeDirectory')")
     .then(function (data) {
       console.log('List Info:', data.d);
       totalCount = data.d.ItemCount;
@@ -175,24 +177,53 @@
       next = data.d.__next;
       renderEmployee(items);
     }, function (error) { console.error(error); });
-
   }
 
-  function itemSelected(itemID){
-    var item = items.filter(function(i){return i.ID == itemID});
+  function itemSelected(itemID) {
+    var item = items.filter(function (i) { return i.ID == itemID });
     selectedItem = item[0];
-    console.log('Selected item is ', item[0]);
+    console.log('Selected item is ', selectedItem);
+    var dialogHtml = `
+    <div class="modal-dialog">
+      <div class="modal-content">
+
+        <!-- Modal Header -->
+        <div class="modal-header">
+          <h4 class="modal-title">${selectedItem.Title}</h4>
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+
+        <!-- Modal body -->
+        <div class="modal-body">
+          <ul class="list-group">
+            <li class="list-group-item"><strong>Full Name : </strong>${selectedItem.FullName}</li>
+            <li class="list-group-item"><strong>email : </strong> ${selectedItem.PhoneNumber}</li>
+            <li class="list-group-item"><strong>Location : </strong> ${selectedItem.OfficeLocation}</li>
+            <li class="list-group-item"><strong>Title : </strong> ${selectedItem.Title}</li>
+            <li class="list-group-item"><strong>Bio : </strong> ${selectedItem.ShortDescription}</li>
+          </ul>
+        </div>
+
+        <!-- Modal footer -->
+        <div class="modal-footer">
+          <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+        </div>
+
+      </div>
+    </div>
+    `;
+    $('#myModal').html(dialogHtml);
   }
 
   function renderEmployee(items) {
     var empHtml = '';
     for (var index in items) {
       var item = items[index];
-      item.photo =`https://picsum.photos/id/${index * 1 + 1}/800/800`;
+      item.photo = `https://picsum.photos/id/${index * 1  + 1}/800/800`;
       var imageId = ((index + 1) % 3 == 0) ? 3 : (index + 1) % 3;
       empHtml += `<div class="column">
                       <div class="card">
-                        <img src="${item.photo}" alt="Jane" style="width:100%">
+                        <img src="${item.ImageUrl ? item.ImageUrl : item.photo}" alt="Jane" style="width:100%">
                         <div class="container">
                           <h4>${item.FullName}</h4>
                           <p class="title">${item.Title}</p>
@@ -225,6 +256,19 @@
       next = data.d.__next;
       renderEmployee(items);
     }, function (error) { console.error(error); });
+
+    $("#mtmSearchButton").click(function () {
+      console.log('Searching...', document.getElementById('mtmSearchQuery').value);
+      var query = document.getElementById('mtmSearchQuery').value;
+      var param = `?$filter=substringof('${query}',FullName)&$top=9`;
+      getItems('EmployeeDirectory', param).then(function (data) {
+        // response data      
+        items = data.d.results;
+        console.log('Items are : ', items);
+        next = data.d.__next;
+        renderEmployee(items);
+      }, function (error) { console.error(error); });
+    });
 
 
   });
