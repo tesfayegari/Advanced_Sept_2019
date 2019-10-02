@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+  <style>
+    #pageTitle{display: none;}
+    .form-control{min-height: 50px;}
+  </style>
+</head>
+
+<body>
+  <div class="container mt-5">
+    <div class="form-row">
+      <div class="form-group col-md-6">
+        <label for="idEmail">Email</label>
+        <input type="text" class="form-control" id="idEmail" placeholder="email@email.com" disabled>
+      </div>
+      <div class="form-group col-md-6">
+        <label for="idPassword">Full Name</label>
+        <input type="text" class="form-control" id="idFullName" placeholder="Your Name ..." disabled>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="inputAddress">Address</label>
+      <input type="text" class="form-control" id="inputAddress" placeholder="1234 Main St">
+    </div>
+    <div class="form-group">
+      <label for="inputAddress2">Address 2</label>
+      <input type="text" class="form-control" id="inputAddress2" placeholder="Apartment, studio, or floor">
+    </div>
+    <div class="form-row">
+        <div class="form-group col-md-4">
+            <label for="inputState">State</label>
+            <select id="inputState" class="form-control">
+              <option value="" selected>Choose State...</option>          
+            </select>
+          </div>
+      <div class="form-group col-md-6">
+        <label for="inputCity">City</label>
+        <select id="inputCity" class="form-control" disabled>
+          <option selected>Choose City...</option>
+          
+        </select>
+      </div>
+      
+      <div class="form-group col-md-2">
+        <label for="inputZip">Zip</label>
+        <input type="text" class="form-control" id="inputZip">
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" id="gridCheck" onchange="myFunction2()">
+        <label class="form-check-label" for="gridCheck">
+          Billing address different?
+        </label>
+      </div>
+    </div>
+    <div id="myDIV" style="display: none;">
+      <div class="form-group">
+        <label for="inputShippingAddress">Shiping Address</label>
+        <input type="text" class="form-control" id="inputShippingAddress" placeholder="1234 Main St">
+      </div>
+      <div class="form-group">
+        <label for="inputShippingAddress2">Address 2</label>
+        <input type="text" class="form-control" id="inputShippingAddress2" placeholder="Apartment, studio, or floor">
+      </div>
+      <div class="form-row">
+        <div class="form-group col-md-6">
+          <label for="inputShippingCity">City</label>
+          <select  class="form-control" id="inputShippingCity">
+            <option selected>Choose City...</option>
+            <option>...</option>
+          </select>
+        </div>
+        <div class="form-group col-md-4">
+          <label for="inputShippingState">State</label>
+          <select id="inputShippingState" class="form-control">
+            <option selected>Choose State...</option>
+            <option>...</option>
+          </select>
+        </div>
+        <div class="form-group col-md-2">
+          <label for="inputShippingZip">Zip</label>
+          <input type="text" class="form-control" id="inputShippingZip">
+        </div>
+      </div>
+    </div>
+
+    <input onclick="submitData()" type="button" value="Checkout" class="btn btn-primary">
+  </div>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="/sites/demo/SiteAssets/CustomForms/app.js"></script>
+  <script>    
+    function myFunction2() {
+      var checkBox = document.getElementById("gridCheck");
+      var hiddenDiv = document.getElementById("myDIV");
+      if (checkBox.checked == true) {
+        hiddenDiv.style.display = "block";
+      } else {
+        hiddenDiv.style.display = "none";
+      }
+    }
+  </script>
+
+</body>
+
+</html>
