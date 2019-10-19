@@ -1,0 +1,18 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/config.2.0.schema.json",
+  "version": "2.0",
+  "bundles": {
+    "employee-card-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/employeeCard/EmployeeCardWebPart.js",
+          "manifest": "./src/webparts/employeeCard/EmployeeCardWebPart.manifest.json"
+        }
+      ]
+    }
+  },
+  "externals": {},
+  "localizedResources": {
+    "EmployeeCardWebPartStrings": "lib/webparts/employeeCard/loc/{locale}.js"
+  }
+}
