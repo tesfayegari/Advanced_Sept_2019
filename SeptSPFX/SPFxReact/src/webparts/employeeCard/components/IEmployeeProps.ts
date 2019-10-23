@@ -3,6 +3,7 @@ export interface IEmployeeCardProps {
 }
 export interface IEmployeeCardsProps {
   description: string;
+  employees: IEmployee[];
 }
 
 export interface IEmployee{

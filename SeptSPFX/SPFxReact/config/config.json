@@ -13,6 +13,7 @@
   },
   "externals": {},
   "localizedResources": {
-    "EmployeeCardWebPartStrings": "lib/webparts/employeeCard/loc/{locale}.js"
+    "EmployeeCardWebPartStrings": "lib/webparts/employeeCard/loc/{locale}.js",
+    "PropertyControlStrings": "node_modules/@pnp/spfx-property-controls/lib/loc/{locale}.js"
   }
 }

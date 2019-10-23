@@ -4,7 +4,9 @@ import { IEmployeeCardProps } from './IEmployeeProps';
 
 export default class EmployeeCard extends React.Component<IEmployeeCardProps, {}> {
   public render(): React.ReactElement<IEmployeeCardProps> {
+    
     return (
+      this.props.employee ? 
       <div className="col-md-4 col-sm-12">
         <div className="card-container">
           <div className="card">
@@ -16,7 +18,10 @@ export default class EmployeeCard extends React.Component<IEmployeeCardProps, {}
             </div>
           </div>
         </div>
-      </d
+      </div>
+      : 
+      <h2>Empty Employee</h2>
+
     );
   }
 }
