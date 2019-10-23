@@ -5,10 +5,12 @@ This is where you include your WebPart documentation.
 ### Building the code
 
 ```bash
-git clone the repo
+Download the whole folder
+--install dependecies using 
 npm i
-npm i -g gulp
-gulp
+
+--Test using 
+gulp serve 
 ```
 
 This package produces the following:
