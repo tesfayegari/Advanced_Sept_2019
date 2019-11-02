@@ -14,16 +14,28 @@ interface ISharePointFormState {
   isBillingSame: boolean;
   billing: string;
   zip: string;
+  states: any[];
+  currentUserID: number;
+  item: any;
 }
 
 interface IListItem{
   Title: String;
   Id?: number;
+  FullNameId: number;
+  StreetAddress: string;
+  Address2: string;
+  City: string;
+  isBillingSame: boolean;
+  BillingAddress: string;
+  ZipCode: string;
+  StateId: number;
 }
 
 export default class SharePointForms extends React.Component<ISharePointFormsProps, ISharePointFormState> {
   private listItemEntityTypeName: string = undefined;
   private listName= 'PurchaseDetail';
+  
   constructor(props: ISharePointFormsProps) {
     super(props);
     this.state = {
@@ -35,8 +47,14 @@ export default class SharePointForms extends React.Component<ISharePointFormsPro
       state: 0,
       isBillingSame: true,
       billing: '',
-      zip: ''
+      zip: '',
+      states: [],
+      currentUserID: null,
+      item: null
     };
+
+    this.readItems('State');
+    this.currentUser();
 
     this.onChange = this.onChange.bind(this);
     this.handleCancel = this.handleCancel.bind(this);
@@ -70,14 +88,22 @@ export default class SharePointForms extends React.Component<ISharePointFormsPro
 
   // CRUD Operations
   private createItem(): void { 
-
+    const newItem = this.state;
     this.getListItemEntityTypeName()
       .then((listItemEntityTypeName: string): Promise<SPHttpClientResponse> => {
         const body: string = JSON.stringify({
           '__metadata': {
             'type': listItemEntityTypeName
           },
-          'Title': `Developer ${new Date()}`
+          'Title': newItem.Title,
+          "FullNameId": newItem.currentUserID,
+          "StreetAddress": newItem.street,
+          "Address2": newItem.Appartment,
+          "City": newItem.city,
+          "isBillingSame": newItem.isBillingSame,
+          "BillingAddress": newItem.billing,
+          "ZipCode": newItem.zip,
+          "StateId": newItem.state == 0 ? null : newItem.state
         });
         return this.props.spHttpClient.post(`${this.props.siteUrl}/_api/web/lists/getbytitle('${this.listName}')/items`,
           SPHttpClient.configurations.v1,
@@ -127,11 +153,71 @@ export default class SharePointForms extends React.Component<ISharePointFormsPro
     });
   }
 
+  private readItems(list): void {    
+    this.props.spHttpClient.get(`${this.props.siteUrl}/_api/web/lists/getbytitle('${list}')/items?$select=Title,Id`,
+      SPHttpClient.configurations.v1,
+      {
+        headers: {
+          'Accept': 'application/json;odata=nometadata',
+          'odata-version': ''
+        }
+      })
+      .then((response: SPHttpClientResponse): Promise<{ value: any[] }> => {
+        return response.json();
+      })
+      .then((response: { value: any[] }): void => {
+        this.setState({states: response.value});// = response.value;
+      }, (error: any): void => {
+        console.error('Loading all items failed with error: ' , error);
+          
+      });
+  }
+  private readItem(itemId): void {    
+    this.props.spHttpClient.get(`${this.props.siteUrl}/_api/web/lists/getbytitle('${this.listName}')/items(${itemId})`,
+      SPHttpClient.configurations.v1,
+      {
+        headers: {
+          'Accept': 'application/json;odata=nometadata',
+          'odata-version': ''
+        }
+      })
+      .then((response: SPHttpClientResponse): Promise<any> => {
+        return response.json();
+      })
+      .then((response: any): void => {
+        this.setState({item: response});// = response.value;
+      }, (error: any): void => {
+        console.error('Loading all items failed with error: ' , error);
+          
+      });
+  }
+
+  private currentUser(): void {    
+    this.props.spHttpClient.get(`${this.props.siteUrl}/_api/web/currentuser`,
+      SPHttpClient.configurations.v1,
+      {
+        headers: {
+          'Accept': 'application/json;odata=nometadata',
+          'odata-version': ''
+        }
+      })
+      .then((response: SPHttpClientResponse): Promise<any> => {
+        return response.json();
+      })
+      .then((response: any): void => {
+        this.setState({currentUserID: response.Id, fullName: response.Title});// = response.value;
+      }, (error: any): void => {
+        console.error('Loading all items failed with error: ' , error);          
+      });
+  }
+
   // End f CRUD Operations
 
   private onChangeCheckbox = (e) => this.setState({ isBillingSame: e.target.checked });
 
   public render(): React.ReactElement<ISharePointFormsProps> {
+    console.log('States are ', this.state.states);
+    const stateItems = this.state.states.map(item => <option value= {item.Id}>{item.Title}</option>);
     return (
       <div className="container-fluid">
         <h2>{this.props.description}</h2>
@@ -145,7 +231,7 @@ export default class SharePointForms extends React.Component<ISharePointFormsPro
           <div className="col-md-6">
             <div className="form-group">
               <label htmlFor="fullName">Full Name:</label>
-              <input type="text" className="form-control" placeholder="Enter Full Name" name="fullName" value={this.state.fullName} onChange={this.onChange} />
+              <input type="text" className="form-control" placeholder="Enter Full Name" name="fullName" value={this.state.fullName} onChange={this.onChange} disabled/>
             </div>
           </div>
         </div>
@@ -176,6 +262,7 @@ export default class SharePointForms extends React.Component<ISharePointFormsPro
               <label >State:</label>
               <select className="form-control" name="state" value={this.state.state} onChange={this.onChange}>
                 <option value="0">Select State --</option>
+                {stateItems}
               </select>
             </div>
           </div>
