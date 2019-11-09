@@ -1,0 +1,113 @@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+
+<style>
+  .customChart {
+    padding: 10px;
+    float: left;
+    width: 400px;
+    height: 400px;
+  }
+</style>
+
+<div class="customChart">
+  <canvas id="myChart" width="400" height="400"></canvas>
+</div>
+<div class="customChart">
+  <canvas id="myChart2" width="400" height="400"></canvas>
+</div>
+
+<script>
+  function getItems(listName, odata) {
+    var endPoint = _spPageContextInfo.webAbsoluteUrl + "/_api/web/Lists/getbytitle('" + listName + "')/items" + odata;
+    return $.ajax({
+      url: endPoint,
+      type: "GET",
+      headers: {
+        accept: "application/json;odata=verbose"
+      }
+    });
+  } //End of GetList Items
+
+  getItems('PnpList', '?$select=department,Title&$orderby=department&$top=5000')
+    .then(function (response) {
+      console.log('Data is ', response.d.results);
+      var listItems = response.d.results;
+      var deptLables = [], deptCounts = [];
+      var prevDepartment = listItems[0].department, count = 0;
+      listItems.forEach(function (item) {
+        if (prevDepartment === item.department) {
+          count++;
+        } else {
+          deptLables.push(prevDepartment);
+          deptCounts.push(count);
+          count = 1;
+          prevDepartment = item.department;
+        }
+      });
+      console.log('Output is ', deptLables, deptCounts);
+      drawChart(deptLables, deptCounts, 'myChart','bar');
+      drawChart(deptLables, deptCounts, 'myChart2','pie');
+
+    },
+      function (error) { console.error('Oops Error', error); });
+
+  //End if Geting PNP List items 
+  function drawChart(labels, counts, domElement, chartType) {
+    var ctx = document.getElementById(domElement).getContext('2d');
+    
+    var chartConfig = {
+      type: chartType,
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'PNPList Data',
+          data: counts,
+          backgroundColor: [
+            'rgba(255, 99, 132, 0.2)',
+            'rgba(54, 162, 235, 0.2)',
+            'rgba(255, 206, 86, 0.2)',
+            'rgba(75, 192, 192, 0.2)',
+            'rgba(153, 102, 255, 0.2)',
+            'rgba(255, 159, 64, 0.2)',
+            'blue',
+            'green',
+            'red',
+            'pink',
+            'purple'
+          ],
+          borderColor: [
+            'rgba(255, 99, 132, 1)',
+            'rgba(54, 162, 235, 1)',
+            'rgba(255, 206, 86, 1)',
+            'rgba(75, 192, 192, 1)',
+            'rgba(153, 102, 255, 1)',
+            'rgba(255, 159, 64, 1)',
+            'blue',
+            'green',
+            'red',
+            'pink',
+            'purple'
+          ],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        scales: chartType ==='bar' ?  {
+          yAxes: [{
+            ticks: {
+              beginAtZero: true
+            }
+          }]
+        } : {},
+        legend: {    
+            display:   chartType ==='bar' ? false: true,      
+            position: 'bottom'
+        }
+      }
+    };
+    var myChart = new Chart(ctx, chartConfig);   
+  }
+
+</script>
