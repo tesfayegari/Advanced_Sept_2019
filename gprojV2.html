@@ -49,7 +49,7 @@
     var hasbeenRevertedToMPU = "/_api/web/lists/getbytitle('DomForms')/items?$filter=substringof('Completed',Office_x0020_Routing) and Has_x0020_Been_x0020_Revertedto_x0020_MPU eq 'Reverted from FTU to MPU'";
     var hasbeenRevertedToMPU = "/_api/web/lists/getbytitle('IntlForms')/items?$filter=substringof('Completed',Office_x0020_Routing) and Has_x0020_Been_x0020_Revertedto_x0020_MPU eq 'Reverted from FTU to MPU'";
 
-    var lists = [];
+    var lists = [], tempList;
     var title;
     getData(hasbeenApprovedFTU).then(function (r1) {
       console.log('Response Data1', r1);
@@ -62,34 +62,38 @@
 
         getData(revertedToFO).then(function (r3) {
           console.log('Response Data3', r3);
+          tempList = r3.d.results;
           lists = lists.concat(r3.d.results);
           title = 'Reverted to FO';
           getData(revertedToFO1).then(function (r4) {
-            console.log('Response Data4', r4, lists.concat(r4.d.results));
-            r4.forEach(function (itm) { itm.Office_x0020_Routing = title; });
-            lists = lists.concat(r4.d.results);
+            console.log('Response Data4', r4);
+            tempList.concat(r4.d.results);
+            tempList.forEach(function (itm) { itm.Office_x0020_Routing = title; });
+            lists = lists.concat(tempList);
 
             getData(hasbeenApprovedMPU).then(function (r5) {
               console.log('Response Data5', r5);
-              lists = lists.concat(r5.d.results);
+              tempList= r5.d.results;
               title = 'Approved-Mission Planning Unit';
               getData(hasbeenApprovedMPU1).then(function (r6) {
-                console.log('Response Data6', r6, lists.concat(r4.d.results));
-                r6.forEach(function (itm) { itm.Office_x0020_Routing = title; });
-                lists = lists.concat(r6.d.results);
+                console.log('Response Data6', r6);
+                tempList.concat(r6.d.results);
+                tempList.forEach(function (itm) { itm.Office_x0020_Routing = title; });
+                lists = lists.concat(tempList);
 
                 getData(hasbeenRevertedToMPU).then(function (r7) {
                   console.log('Response Data5', r7);
-                  lists = lists.concat(r7.d.results);
+                  tempList = r7.d.results;
                   title = 'Reverted from FTU to MPU';
                   getData(hasbeenRevertedToMPU1).then(function (r8) {
-                    console.log('Response Data6', r8, lists.concat(r8.d.results));
-                    r8.forEach(function (itm) { itm.Office_x0020_Routing = title; });
-                    lists = lists.concat(r8.d.results);
+                    console.log('Response Data6', r8);
+                    tempList.concat(r8.d.results);
+                    tempList.forEach(function (itm) { itm.Office_x0020_Routing = title; });
+                    lists = lists.concat(tempList);
 
                     getData(flightButtonClicked).then(function (r9) {
                       console.log('Response Data5', r9);
-                      lists = lists.concat(r9.d.results);
+                      tempList = r9.d.results;
                       title = 'Reverted from MPU to FTU';
                       // getData(flightButtonClicked1).then(function (r10) {
                       //   console.log('Response Data6', r10, lists.concat(r10.d.results));
@@ -97,10 +101,11 @@
                       //   lists = lists.concat(r10.d.results);
 
                       // }, function (error) { console.error('Ooops Error', error); });
-                      getData(flightButtonClicked1).then(function (response21) {
-                        console.log('Response Data', response21, lists.concat(response21.d.results));
-                        response21.forEach(function (itm) { itm.Office_x0020_Routing = title; });
-                        var result = lists.concat(response21.d.results);
+                      getData(flightButtonClicked1).then(function (r10) {
+                        console.log('Response Data', r10);
+                        tempList.concat(r10.d.results);
+                        tempList.forEach(function (itm) { itm.Office_x0020_Routing = title; });
+                        var result = lists.concat(tempList);
 
                         //data is result
 
