@@ -1,0 +1,229 @@
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.1.6/Chart.js"></script>
+<style>
+        div#myLists {
+            /* display: table; */
+            width: 100%;
+        }
+
+        .bulletted-list {
+            /* display: table-cell; */
+            padding: 5px;
+            border: #ddd 1px solid;
+            width: 410px;
+            float: left;
+            height: 660px;
+	    margin-right: 20px;
+    	    margin-bottom: 10px;
+        }
+    </style>
+<div id="myLists">
+  
+</div>
+<script>
+  function getData(endPoint){
+    var webUrl = _spPageContextInfo.webAbsoluteUrl;
+
+    return $.ajax({
+      url: webUrl + endPoint,
+      method: "GET",
+      headers: { "Accept": "application/json; odata=verbose" }
+    });
+  }
+
+  $(document).ready(function(){
+    
+
+var revertedToFO = "/_api/web/lists/getbytitle('DomForms')/items?$filter=substringof('Completed',Office_x0020_Routing) and Has_x0020_Been_x0020_Reverted_x0020_To_x0020_FO eq 'Reverted to FO'";
+var revertedToFO1 = "/_api/web/lists/getbytitle('IntlForms')/items?$filter=substringof('Completed',Office_x0020_Routing) and Has_x0020_Been_x0020_Reverted_x0020_To_x0020_FO eq 'Reverted to FO'";
+
+var hasbeenApprovedFTU = "/_api/web/lists/getbytitle('DomForms')/items?$filter=substringof('Completed',Office_x0020_Routing) and Has_x0020_Been_x0020_Approved_x0020_FTU eq 'Approved-Flight Tracking Unit'";
+var hasbeenApprovedFTU1 = "/_api/web/lists/getbytitle('IntlForms')/items?$filter=substringof('Completed',Office_x0020_Routing) and Has_x0020_Been_x0020_Approved_x0020_FTU eq 'Approved-Flight Tracking Unit'";
+
+var hasbeenApprovedMPU = "/_api/web/lists/getbytitle('DomForms')/items?$filter=substringof('Completed',Office_x0020_Routing) and Hasbeen_x0020_Approved_x0020_MPU eq 'Approved-Mission Planning Unit'";
+var hasbeenApprovedMPU1 = "/_api/web/lists/getbytitle('IntlForms')/items?$filter=substringof('Completed',Office_x0020_Routing) and Hasbeen_x0020_Approved_x0020_MPU eq 'Approved-Mission Planning Unit'";
+
+var flightButtonClicked = "/_api/web/lists/getbytitle('DomForms')/items?$filter=substringof('Completed',Office_x0020_Routing) and Flight_x0020_Tracking_x0020_Button_x0020_Clicked eq 'Reverted from MPU to FTU'";
+var flightButtonClicked1 = "/_api/web/lists/getbytitle('IntlForms')/items?$filter=substringof('Completed',Office_x0020_Routing) and Flight_x0020_Tracking_x0020_Button_x0020_Clicked eq 'Reverted from MPU to FTU'";
+
+var hasbeenRevertedToMPU = "/_api/web/lists/getbytitle('DomForms')/items?$filter=substringof('Completed',Office_x0020_Routing) and Has_x0020_Been_x0020_Revertedto_x0020_MPU eq 'Reverted from FTU to MPU'";
+var hasbeenRevertedToMPU = "/_api/web/lists/getbytitle('IntlForms')/items?$filter=substringof('Completed',Office_x0020_Routing) and Has_x0020_Been_x0020_Revertedto_x0020_MPU eq 'Reverted from FTU to MPU'";
+
+    var lists = [];
+    getData(hasbeenApprovedFTU).then(function(response){
+      console.log('Response Data', response);
+      lists = response.d.results;
+
+      getData(hasbeenApprovedFTU1).then(function(response2){
+      console.log('Response Data', response2,lists.concat(response2.d.results));
+      var result = lists.concat(response2.d.results);
+      
+      //data is result
+
+        console.log(result);
+        var byFieldOffice = [];
+
+        var sortedResult = result.sort(compare);
+
+        console.log('Sorted ', sortedResult);
+        //sortedResult.forEach(function(i){console.log(i.Field_x0020_Office);});
+
+        sortedResult.forEach(function (item) {
+            if (search(item.Office_x0020_Routing, byFieldOffice)) {
+                search(item.Office_x0020_Routing, byFieldOffice).items.push(item.Field_x0020_Office);
+            } else {
+                var a = [];
+                a.push(item.Field_x0020_Office);
+                byFieldOffice.push({ name: item.Office_x0020_Routing, items: a })
+            }
+        });
+
+        console.log(byFieldOffice);
+
+        var myHtml = '';
+
+
+        var id = 1;
+        byFieldOffice.forEach(function (form) {
+            console.log(form.name);
+            myHtml += '<div class="bulletted-list"><div ><h2>' + form.name + '- Totals: ' + form.items.length + '</h2><b>Offices:</b><ul>';
+            var grouped = groupItems(form.items);
+            console.log(grouped);
+            grouped.forEach(function (office) {
+                myHtml += '<li> ' + office.name + ' - Count: ' + office.count + '</li>';
+            });
+            myHtml += '</ul></div>' + '<canvas id="myChart' + id++ + '" width="400" height="400"></canvas></div>';
+        });
+	
+	$('#myLists').html(myHtml);
+
+        var graphIndex = 1;
+        byFieldOffice.forEach(function (form) {
+            var grouped = groupItems(form.items);
+            drawGraph(grouped, graphIndex++, form.name)
+            
+        });
+
+	function drawGraph(coll, index, graphName) {
+            var names = [];
+            var data = [];
+            coll.forEach(function (d) {
+                names.push(d.name);
+                data.push(d.count);
+            });
+
+            var ctx = document.getElementById("myChart" + index);
+            var myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: names,
+                    datasets: [{
+                        label: graphName,
+                        data: data,
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.2)',
+                            'rgba(54, 162, 235, 0.2)',
+                            'rgba(255, 206, 86, 0.2)',
+                            'rgba(75, 192, 192, 0.2)',
+                            'rgba(153, 102, 255, 0.2)',
+                            'rgba(255, 159, 64, 0.2)',
+                            'rgba(255, 99, 132, 0.2)',
+                            'rgba(54, 162, 235, 0.2)',
+                            'rgba(255, 206, 86, 0.2)',
+                            'rgba(75, 192, 192, 0.2)',
+                            'rgba(153, 102, 255, 0.2)',
+                            'rgba(255, 159, 64, 0.2)'
+                        ],
+                        borderColor: [
+                            'rgba(255,99,132,1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)',
+                            'rgba(255, 159, 64, 1)',
+                            'rgba(255,99,132,1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)',
+                            'rgba(255, 159, 64, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: false,
+                    scales: {
+                        xAxes: [{
+                            ticks: {
+                                maxRotation: 90,
+                                minRotation: 80
+                            }
+                        }],
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: true
+                            }
+                        }]
+                    }
+                }
+            });
+        }
+
+        
+
+        function groupItems(items){
+            if(items.length == 0){
+                return [];
+            }
+
+            var ret = [];
+            var prev = items[0];
+            var count = 0;
+            for(var i = 0; i< items.length; i++){
+                if(prev === items[i]) {
+                    count++;
+                    if(i == items.length - 1){
+                        ret.push({name:prev,count:count});
+                    }
+                } else{
+                    ret.push({name:prev,count:count});
+                    count = 1;
+                    prev = items[i];
+                    if(i == items.length - 1){
+                        ret.push({name:prev,count:count});
+                    }
+                }
+            }
+            return ret;
+        }
+
+        function search(nameKey, myArray) {
+            for (var i = 0; i < myArray.length; i++) {
+                if (myArray[i].name === nameKey) {
+                    return myArray[i];
+                }
+            }
+            return null;
+        }
+
+        //Comparison by field name
+        function compare(a, b) {
+            if (a.Field_x0020_Office < b.Field_x0020_Office) {
+                return -1;
+            }
+            if (a.Field_x0020_Office > b.Field_x0020_Office) {
+                return 1;
+            }
+            return 0;
+        }
+     
+
+
+      //End of the inner get data
+    },function(error){console.error('Ooops Error',error);});
+
+      //end of the outer get data
+    },function(error){console.error('Ooops Error',error);});
+  });
+</script>
